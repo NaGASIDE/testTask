@@ -1,26 +1,69 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from 'react';
+import { columns, data } from './shared/helpers'
+import { useDispatch } from 'react-redux'
+import {getUsers} from "./store/actions/usersAction";
+import { Loading } from './components/Loading/Loading'
+import { useTypedSelector } from './hooks/useTypedSelector'
+require("react/package.json"); // react is a peer dependency.
+const reactTable = require("react-table")
 
-function App() {
+
+export const App = () => {
+
+  useEffect(() => {
+    dispatch(getUsers())
+  }, [])
+
+  const dispatch = useDispatch()
+  const {users, isError, errorTitle, isFetching} = useTypedSelector((state) => state.users)
+
+  const tableInstance = reactTable.useTable({ columns, data })
+
+  const {
+    headerGroups,
+    rows,
+    prepareRow,
+  } = tableInstance
+
+  if (isError) {
+    return (
+      <div>
+        { errorTitle }
+      </div>
+    )
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <>
+      {isFetching ?
+      <Loading /> :
+        <table>
+          <thead  >
+          {headerGroups.map((headerGroup:any) => (
+            <tr>
+              {headerGroup.headers.map((column:any) => (
+                <th style={{border:`1px solid black`}} >
+                  {column.render('Header')}
+                </th>
+              ))}
+            </tr>
+          ))}
+          </thead>
+          <tbody>
+          {rows.map((row:any) => {
+            prepareRow(row)
+            return (
+              <tr>
+                {row.cells.map((cell:any) => (
+                  <td style={{border:`1px solid black`}} >
+                    {cell.render('Cell')}
+                  </td>
+                ))}
+              </tr>
+            )})}
+          </tbody>
+        </table>
+      }
+    </>
+  )
 }
-
-export default App;

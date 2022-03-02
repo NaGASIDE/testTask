@@ -1,11 +1,10 @@
 export interface IInitialState {
   users: IUser[] | undefined;
+  selectedIds: number[] | undefined;
   isFetching:boolean;
   isError: boolean;
   errorTitle: null | string | undefined
 }
-
-export type UsersAction = UsersGetSuccess | UsersGetRequest | UsersGetFailure
 
 export interface UsersGetSuccess {
   type: string;
@@ -19,6 +18,21 @@ export interface UsersGetRequest {
 export interface UsersGetFailure {
   type: string;
   payload?: string | null | undefined
+}
+
+export interface DeleteUser {
+  type: string;
+  payload?: number
+}
+
+export interface SelectId {
+  type: string;
+  payload?: number | undefined
+}
+
+export interface UnSelectId {
+  type: string;
+  payload?: number | undefined
 }
 
 interface IAddress {
@@ -38,12 +52,13 @@ interface ICompany {
   bs: string;
 }
 
-interface IUser {
+export interface IUser {
   id: number;
   name: string;
   username: string;
   email: string;
   address: IAddress;
   phone: string;
+  website: string;
   company: ICompany
 }

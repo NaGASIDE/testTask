@@ -1,69 +1,39 @@
-import React, { useEffect } from 'react';
-import { columns, data } from './shared/helpers'
+import React, { useEffect, useState } from 'react';
+import { columns } from './shared/helpers'
 import { useDispatch } from 'react-redux'
 import {getUsers} from "./store/actions/usersAction";
 import { Loading } from './components/Loading/Loading'
 import { useTypedSelector } from './hooks/useTypedSelector'
+import './style.scss'
+import {isArray} from "util";
+import {Outlet, Link, Routes, Route, Navigate} from "react-router-dom";
+import { Users } from "./components/Users/Users";
+import {User} from "./components/User/User";
+import {useAction} from "./hooks/useAction";
 require("react/package.json"); // react is a peer dependency.
 const reactTable = require("react-table")
 
-
 export const App = () => {
 
+  const { getUsers } = useAction()
+
   useEffect(() => {
-    dispatch(getUsers())
+    getUsers()
   }, [])
 
-  const dispatch = useDispatch()
-  const {users, isError, errorTitle, isFetching} = useTypedSelector((state) => state.users)
-
-  const tableInstance = reactTable.useTable({ columns, data })
-
-  const {
-    headerGroups,
-    rows,
-    prepareRow,
-  } = tableInstance
+  const {users, isError, errorTitle} = useTypedSelector((state) => state.users)
 
   if (isError) {
     return (
-      <div>
-        { errorTitle }
-      </div>
-    )
-  }
+      <div>{ errorTitle }</div>
+    )}
 
   return (
-    <>
-      {isFetching ?
-      <Loading /> :
-        <table>
-          <thead  >
-          {headerGroups.map((headerGroup:any) => (
-            <tr>
-              {headerGroup.headers.map((column:any) => (
-                <th style={{border:`1px solid black`}} >
-                  {column.render('Header')}
-                </th>
-              ))}
-            </tr>
-          ))}
-          </thead>
-          <tbody>
-          {rows.map((row:any) => {
-            prepareRow(row)
-            return (
-              <tr>
-                {row.cells.map((cell:any) => (
-                  <td style={{border:`1px solid black`}} >
-                    {cell.render('Cell')}
-                  </td>
-                ))}
-              </tr>
-            )})}
-          </tbody>
-        </table>
-      }
-    </>
+    <Routes>
+      <Route path='/users' element={<Users />}>
+        <Route path=':userId' element={<User />}/>
+      </Route>
+      <Route path="*" element={<Navigate to='/users' />}/>
+    </Routes>
   )
 }
